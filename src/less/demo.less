@@ -1,0 +1,24 @@
+.wrapper {
+   width: 100%;
+   margin-bottom: 15px;
+
+   *zoom: 1;
+   &:before,
+   &:after {
+      display: table;
+      content: "";
+      line-height: 0; }
+
+   &:after {
+      clear: both; }
+}
+
+.element {
+   width: 31%;
+   float: left;
+   margin-left: 1.9%;
+
+&:first-child {
+   margin-left: 0; }
+
+}

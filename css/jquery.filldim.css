@@ -1,0 +1,125 @@
+/* line 10, /Users/valpo/sites/frameworks/FillDim/src/less/jquery.filldim.less */
+.filldim-wrapper,
+.filldim-widescreen,
+.filldim-standard {
+  position: relative;
+  border: 0;
+  height: 0;
+  width: 100%;
+}
+/* line 19, /Users/valpo/sites/frameworks/FillDim/src/less/jquery.filldim.less */
+.filldim-target {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+/* line 26, /Users/valpo/sites/frameworks/FillDim/src/less/jquery.filldim.less */
+.filldim-widescreen > .filldim,
+.filldim-standard > .filldim,
+.filldim-widescreen > object,
+.filldim-standard > object,
+.filldim-widescreen > iframe,
+.filldim-standard > iframe,
+.filldim-widescreen > embed,
+.filldim-standard > embed,
+.filldim-widescreen > img,
+.filldim-standard > img,
+.filldim-widescreen > div,
+.filldim-standard > div,
+.filldim-widescreen > section,
+.filldim-standard > section,
+.filldim-widescreen > article,
+.filldim-standard > article,
+.filldim-widescreen > aside,
+.filldim-standard > aside,
+.filldim-widescreen > header,
+.filldim-standard > header,
+.filldim-widescreen > footer,
+.filldim-standard > footer,
+.filldim-widescreen > figure,
+.filldim-standard > figure,
+.filldim-widescreen > figcaption,
+.filldim-standard > figcaption {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+/* line 33, /Users/valpo/sites/frameworks/FillDim/src/less/jquery.filldim.less */
+.filldim-widescreen {
+  padding-top: 56.25%;
+}
+/* line 36, /Users/valpo/sites/frameworks/FillDim/src/less/jquery.filldim.less */
+.filldim-standard {
+  padding-top: 75%;
+}
+/*#dimensions {*/
+/**/
+/*   .generate(@depth) {*/
+/*      [class*='filldim-'] {*/
+/*         position:   relative;*/
+/*         border:     0;*/
+/*         height:     0;*/
+/*         width:      100%;*/
+/*         &[class*='span'] { width: inherit; }*/
+/*>div, >section, >article, >aside, >object,*/
+/*>header, >footer, >iframe, >embed, >img,*/
+/*>figure, >figcaption {*/
+/*            position: absolute;*/
+/*            top:  0; left: 0;*/
+/*            width:    100%;*/
+/*            height:   100%;*/
+/*         }*/
+/*      }*/
+/**/
+/*      .filldimR(@cols: 1, @rows: 1) {*/
+/*         @ratio:  @rows / @cols;*/
+/*         padding: percentage(@ratio) 0 0 0;*/
+/*      }*/
+/**/
+/*      .fillW(@cols) when (@cols > 0) {*/
+/*         .fillH(@rows) when (@rows > 0) {*/
+/*            (~".filldim-@{cols}-@{rows}") { .filldimR(@cols, @rows); }*/
+/*            .fillH(@rows - 1);*/
+/*         }*/
+/*         .fillH(0) {}*/
+/**/
+/*         .fillH(@cols);*/
+/*         .fillW(@cols - 1);*/
+/*      }*/
+/*      .fillW(0) {}*/
+/**/
+/*      // Start the engine...*/
+/*      .fillW(@depth);*/
+/**/
+/*      // Classes that aren't automatically generated*/
+/*      .filldim-widescreen      { .filldimR(16,9); }*/
+/*      .filldim-standard        { .filldimR(4,3); }*/
+/*      .filldim-1, .filldim-1-1 { .filldimR(); }*/
+/*   }*/
+/**/
+/*   // Just in case you wanted to call*/
+/*   // the mixin directly*/
+/*   .filldim(@cols: 1, @rows: 1) {*/
+/*      @ratio:     @rows / @cols;*/
+/*      padding:    percentage(@ratio) 0 0 0;*/
+/*      position:   relative;*/
+/*      border:     0;*/
+/*      height:     0;*/
+/*      width:      100%;*/
+/*      &[class*='span'] { width: inherit; }*/
+/*      >div, >section, >article, >aside, >object,*/
+/*      >header, >footer, >iframe, >embed, >img {*/
+/*         position: absolute;*/
+/*         top:  0; left: 0;*/
+/*         width:   100%;*/
+/*         height:  100%;*/
+/*      }*/
+/*   }*/
+/*}*/
+/**/
+/*// Set how deep we want the matrix to run*/
+/*#dimensions > .generate(4);*/

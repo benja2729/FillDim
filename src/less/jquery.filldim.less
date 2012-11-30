@@ -1,0 +1,105 @@
+// DIMENSIONS
+// Creates a class to add to a wrapper element.
+// The wrapper (and select immediate children) will
+//    will fill its container width at the given ratio.
+// Useful for responsive embed code. ;)
+// Note: This sets the height, so you may want to set overflow
+//    for the child elements
+// --------------------------
+
+.filldim-wrapper,
+.filldim-widescreen,
+.filldim-standard {
+      position:   relative;
+      border:     0;
+      height:     0;
+      width:      100%;
+}
+
+.filldim-target {
+   position: absolute;
+   top:  0; left: 0;
+   width:      100%;
+   height:     100%; }
+
+.filldim-widescreen, .filldim-standard {
+   >.filldim,
+   >object, >iframe, >embed, >img,
+   >div, >section, >article, >aside, >header, >footer,
+   >figure, >figcaption {
+      .filldim-target(); }
+}
+
+.filldim-widescreen {
+   padding-top: percentage(9/16); }
+
+.filldim-standard {
+   padding-top: percentage(3/4); }
+
+/*#dimensions {*/
+/**/
+/*   .generate(@depth) {*/
+/*      [class*='filldim-'] {*/
+/*         position:   relative;*/
+/*         border:     0;*/
+/*         height:     0;*/
+/*         width:      100%;*/
+/*         &[class*='span'] { width: inherit; }*/
+         /*>div, >section, >article, >aside, >object,*/
+         /*>header, >footer, >iframe, >embed, >img,*/
+         /*>figure, >figcaption {*/
+/*            position: absolute;*/
+/*            top:  0; left: 0;*/
+/*            width:    100%;*/
+/*            height:   100%;*/
+/*         }*/
+/*      }*/
+/**/
+/*      .filldimR(@cols: 1, @rows: 1) {*/
+/*         @ratio:  @rows / @cols;*/
+/*         padding: percentage(@ratio) 0 0 0;*/
+/*      }*/
+/**/
+/*      .fillW(@cols) when (@cols > 0) {*/
+/*         .fillH(@rows) when (@rows > 0) {*/
+/*            (~".filldim-@{cols}-@{rows}") { .filldimR(@cols, @rows); }*/
+/*            .fillH(@rows - 1);*/
+/*         }*/
+/*         .fillH(0) {}*/
+/**/
+/*         .fillH(@cols);*/
+/*         .fillW(@cols - 1);*/
+/*      }*/
+/*      .fillW(0) {}*/
+/**/
+/*      // Start the engine...*/
+/*      .fillW(@depth);*/
+/**/
+/*      // Classes that aren't automatically generated*/
+/*      .filldim-widescreen      { .filldimR(16,9); }*/
+/*      .filldim-standard        { .filldimR(4,3); }*/
+/*      .filldim-1, .filldim-1-1 { .filldimR(); }*/
+/*   }*/
+/**/
+/*   // Just in case you wanted to call*/
+/*   // the mixin directly*/
+/*   .filldim(@cols: 1, @rows: 1) {*/
+/*      @ratio:     @rows / @cols;*/
+/*      padding:    percentage(@ratio) 0 0 0;*/
+/*      position:   relative;*/
+/*      border:     0;*/
+/*      height:     0;*/
+/*      width:      100%;*/
+/*      &[class*='span'] { width: inherit; }*/
+/*      >div, >section, >article, >aside, >object,*/
+/*      >header, >footer, >iframe, >embed, >img {*/
+/*         position: absolute;*/
+/*         top:  0; left: 0;*/
+/*         width:   100%;*/
+/*         height:  100%;*/
+/*      }*/
+/*   }*/
+/*}*/
+/**/
+/*// Set how deep we want the matrix to run*/
+/*#dimensions > .generate(4);*/
