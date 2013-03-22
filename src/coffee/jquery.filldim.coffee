@@ -12,150 +12,201 @@
 
 do ($ = jQuery) ->
 
-  $.filldim =
-    justify: 'none'
+  # ------------------------- #
+  # ------------------------- #
 
-  $.fn.filldim = (options, trigger) ->
-    defaults = $.extend {}, $.filldim,
-      target: @selector
+  defaults =
+    dims: 1
+    width: 1
+    float: 'none'
 
-    @each (index) =>
-      el = @eq index
-      data = el.data 'FillDim'
-      if $.isEmptyObject data
-        opts = $.extend {}, defaults,
-          dims: el.data 'dims'
-          target: el.data 'target'
-          width: el.data 'width'
-        , options
+  wrapper = $('<div>').addClass('filldim-wrapper').css 'position': 'relative'
 
-        justify = el.prop('class').match /\w+(?=-justify)/
-        if justify isnt null then opts.justify = justify[0]
+  targetCSS =
+    'width': '100%'
+    'height': '100%'
+    'position': 'absolute'
+    'top': 0
+    'left': 0
+    'float': 'none'
 
-        el.data 'FillDim', (new FillDim el, opts)
-      else if typeof options is 'string' then data[options](trigger)
-      else null
+  events = ['propertyWillChange', 'propertyDidChange', 'filldimWillDestroy', 'filldimDidDestroy']
 
+  propertyObservers =
+    dims: ->
+      dims = @get 'dims'
+      width = @get 'width'
+
+      # Since padding percentages are calculated based on
+      # the parent div's width, the 'height' of the dimension
+      # needs to be in reference with the width, so we multiply
+      # the percent width of the wrapper by the relative
+      # dimensions the element should have
+      paddingTop = (width * parseDims(dims) * 100) + '%'
+      @get('wrapper').css {paddingTop}
+
+    width: ->
+      width = (@get('width') * 100) + '%'
+      @get('wrapper').css {width}
+
+      # Change the element's dimensions if not queued to change already
+      # to make sure the dimensions are proportional to the width 
+      if @_queue.indexOf('dims') < 0 then propertyObservers.dims.call this
+
+    float: -> @get('wrapper').css 'float', @get('float')
+
+  parseDims = (dims) -> switch $.type dims
+    when 'number' then dims
+    when 'string'
+      if /:/.test dims
+        d = dims.split ':'
+        parseFloat(d[1], 10) / parseFloat(d[0], 10)
+      else parseFloat(dims, 10) / 100
+    else 1
+
+
+  # ------------------------- #
+  # ------------------------- #
+  
   class FillDim
-
-    # ------------------------- #
-    # Static Members
-    # ------------------------- #
-
-    @wrapperClass: 'filldim-wrapper'
-    @targetClass: 'filldim-target'
-    @getWrapper: (selector = FillDim.wrapperClass) -> $('<div>').addClass selector
-
 
     # ------------------------- #
     # Prototype Members
     # ------------------------- #
 
     constructor: (element, opts) ->
-      @opts = opts
-      console.log @opts
-
-      # State variable to tell if object has initialized
-      @initialized = false
-
-      # State variable to tell if object loaded with wrapper
-      @native = false
-
       @element = element
-      @setDims()
-      @setTarget()
-      @setWrapper()
+      @wrapper()
+      @element.css targetCSS
 
-      @initialized = true
+      @set opts
 
-    render: ->
-      @setTarget()
-      @setWrapper()
+    _propertyCache: {}
+    _queue: []
 
-    # ------------------------- #
-    # Wrapper Functions
-    # ------------------------- #
+    propertiesWillChange: (props) ->
+      @_queue = [null]
+      @set prop, value for own prop, value of props
+      @propertiesDidChange()
 
-    hasWrapper: ->
-      if @wrapper isnt undefined then return @wrapper
-      for selector in [".#{FillDim.wrapperClass}", '.filldim-widescreen', '.filldim-standard']
-        if @element.parent(selector).length > 0 then return selector
-      false
+    propertiesDidChange: ->
+      @_queue.shift()
+      @propertyDidChange prop for prop in @_queue
+      @_queue = []
 
-    setWrapper: (selector = FillDim.wrapperClass) ->
-      wrapper = @hasWrapper()
+    propertyWillChange: (prop) ->
+      @element.trigger 'propertyWillChange', [prop, this]
 
-      if not wrapper
-        target = (if @hasTarget() then @getTarget() else @element)
-        target.wrap FillDim.getWrapper(selector)
-        @wrapper = ".#{selector}"
+      if @_queue[0] is null then @_queue.push prop
+      else @propertyDidChange prop
 
+    propertyDidChange: (prop) ->
+      propertyObservers[prop].call this
+      @element.trigger 'propertyDidChange', [prop, this]
+
+    set: (key, value) ->
+      if $.type(key) is 'object'
+        @propertiesWillChange key
       else
-        if not @initialized then @native = true
-        @wrapper = wrapper
 
-    # @justify()
+        prop = this[key]
+        if $.isFunction prop
+          @_propertyCache[key] = prop.call this, key, value
+        else this[key] = value
 
-    getWrapper: -> @element.parent @wrapper
+        if propertyObservers[key] then @propertyWillChange key
+
+    get: (key) ->
+      p = @_propertyCache
+      if p[key] then return p[key]
+
+      prop = this[key]
+      if $.isFunction prop then prop.call(this) else prop
+
+    wrapper: ->
+      element = @get 'element'
+      parent = element.parent '[class*="filldim-"]'
+      if parent.length is 0
+        parent = wrapper.clone()
+        element.wrap parent
+      parent
+
+    destroy: ->
+      el = @element
+      el.trigger 'filldimWillDestroy'
+
+      el.off(events.slice 0, events.length-1)
+      el.css @get('initCSS')
+      el.unwrap()
+      el.removeData 'filldim'
+
+      el.trigger 'filldimDidDestroy'
+      el.off events.slice(events.length-1)
 
 
-    # ------------------------- #
-    # Target Functions
-    # ------------------------- #
+  # -------------------------------------- #
+  # Attach FillDim functionality
+  # to the jQuery chainable helper
+  # -------------------------------------- #
 
-    hasTarget: ->
-      if @target isnt undefined then return true
-      @getTarget().length > 0
+  getAttrOpts = (element) ->
+    width = element.attr 'width'
+    dims = element.data 'dims'
+    ret = {}
 
-    setTarget: (target = @opts.target) ->
-      obj = @element.closest target
+    if width
+      w = parseFloat(width, 10)
+      height = element.attr 'height'
+      regex = /px/
 
-      if obj.length is 0
-        obj = @element
-        target = @opts.target
+      if height and regex.test(height) and regex.test(width)
+        ret.dims = parseFloat(height, 10) / w
 
-      if @hasTarget() then @getTarget().removeClass FillDim.targetClass
+      else if /%/.test width
+        ret.width = w / 100
 
-      obj.addClass FillDim.targetClass
-      @target = target
+    if not $.isEmptyObject dims then ret.dims = dims
 
-    getTarget: -> @element.closest ".#{FillDim.targetClass}"
+    ret
 
+  getCssOpts = (element, hash) ->
+    width = element.width()
+    height = element.height()
+    console.log element.parent().width(), width
 
-    # ------------------------- #
-    # Dimension Functions
-    # ------------------------- #
- 
-    calcDims: ->
-      target = (if @hasTarget() then @getTarget() else @element)
-      cols = target.attr 'width'
-      rows = target.attr 'height'
+    dims = height / width
+    width /= element.parent().width()
+    float = hash.float
+    {dims, width, float}
 
-      if cols is undefined or rows is undefined
-        cols = target.width()
-        rows = target.height()
-      else
-        cols = parseFloat cols, 10
-        rows = parseFloat rows, 10
+  getInitCSS = (element) ->
+    ret = {}
+    for own key of targetCSS
+      ret[key] = element.css key
+    ret
 
-      rows / cols
+  init = (options) ->
+    attrOpts = getAttrOpts this
+    initCSS = getInitCSS this
+    cssOpts = getCssOpts this, initCSS
+    # defaults, initCSSopts, attrOpts, options, {initCSS}
+    opts = $.extend {}, defaults, cssOpts, attrOpts, options, {initCSS}
 
-    setDims: (dims = @opts.dims) ->
-      console.log "setDims: #{dims}"
-      if not @initialized and @native then return null
-      dims ?= @dims or @calcDims()
-      @dims = @parseDimString(dims)
-      if @hasWrapper() then @getWrapper().css 'padding-top', @getDims()
-      @dims
+    console.log '-------------------'
+    console.log {defaults, cssOpts, attrOpts, options}
+    console.log opts
+    console.log '-------------------'
 
-    getDims: -> "#{@dims * 100}%"
+    @data 'filldim', new FillDim(this, opts)
+  
+  $.fn.filldim = (options, trigger) ->
+    @each (index) =>
+      el = @eq index
+      data = el.data 'filldim'
 
-    parseDimString: (str) ->
-      str = str.toString(10)
-      if /:/.test(str)
-        [cols, rows] = str.split ':'
-        rows / cols
-      else
-        num = parseFloat str, 10
-        if /%/.test(str) then num /= 100
-        num
+      if $.isEmptyObject data then init.call el, options 
+      else if $.type options is 'string' and trigger
+        data.set options, trigger
+      else if options is 'destroy' then data.destroy()
+
+  $(document).ready -> $('.filldim').filldim()

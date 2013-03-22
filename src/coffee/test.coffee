@@ -1,7 +1,6 @@
 
 jQueryReady = ($) ->
   console.log 'jQuery Ready'
-  $('.filldim').filldim()
 
 yepnope
   both: [
